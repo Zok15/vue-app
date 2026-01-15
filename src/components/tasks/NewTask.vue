@@ -15,6 +15,7 @@
                     @keydown.enter="addNewTask"
                     spellcheck="false"
                     v-model="taskInput"
+                    :class="inputClass"
                     @scroll="syncScroll"
                     ref="inputRef"
                 />
@@ -46,6 +47,10 @@ const newTask = reactive({
     is_completed: false,
     priority_id: null,
     due_date: null,
+});
+
+const inputClass = computed(() => {
+    return priorityColors[newTask.priority_id ?? null];
 });
 
 const inputRef = ref();
@@ -86,6 +91,7 @@ const addNewTask = async (event) => {
         newTask.name = taskInput.value;
         newTask.due_date = formatDateLocal(newTask.due_date);
         taskInput.value = '';
+        taskInput.priority_id = null;
         await handleAddedTask(newTask);
     }
 };
