@@ -22,7 +22,14 @@
                         @keyup.esc="undo"
                         @keyup.enter="updateTask"
                         v-model="editingTask"
+                        ref="inputRef"
                     />
+                    <div class="select-priority">
+                        <SelectPriority
+                            :selected="selectedPriority" 
+                            @change="setPriority"
+                        />
+                    </div>
                 </div>
                 <span v-else>{{ task.name }}</span>
             </div>
@@ -39,12 +46,21 @@
 <script setup>
 import { computed, ref } from "vue";
 import TaskActions from "./TaskActions.vue";
+import SelectPriority from "./SelectPriority.vue";
 
 const props = defineProps({
     task: Object,
 });
 
 const emit = defineEmits(["updated", "completed", "removed"]);
+
+const inputRef = ref();
+const selectedPriority = ref(props.task.priority?.id || null)
+
+const setPriority = (id) => {
+    selectedPriority.value = id
+    inputRef.value.focus();
+}
 
 const isEdit = ref(false);
 const editingTask = ref(props.task.name);
@@ -57,7 +73,11 @@ const vFocus = {
 };
 
 const updateTask = (event) => {
-    const updatedTask = { ...props.task, name: event.target.value };
+    const updatedTask = { 
+        ...props.task, 
+        name: event.target.value,
+        priority_id: selectedPriority.value
+    };
     isEdit.value = false;
     emit("updated", updatedTask);
 };
@@ -65,6 +85,7 @@ const updateTask = (event) => {
 const undo = () => {
     isEdit.value = false;
     editingTask.value = props.task.name;
+    selectedPriority.value = props.task.priority?.id || null
 };
 
 const markTaskAsCompleted = (event) => {
@@ -81,11 +102,16 @@ const removeTask = () => {
     }
 };
 
-const priorityClass = computed(() =>
-  props.task.priority === null ?
-    "priority-none" :
-    `priority-${props.task.priority.name}`
-);
+const priorityClass = computed(() => {
+    const classesMap = {
+        null: 'none',
+        1: 'high',
+        2: 'medium',
+        3: 'low'
+    }
+    const activeClass = classesMap[selectedPriority.value] || 'none';
+    return `priority-${activeClass}`;
+});
 </script>
 
 <style scoped>
