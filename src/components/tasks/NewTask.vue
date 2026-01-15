@@ -71,6 +71,7 @@ const addNewTask = async (event) => {
     if (event.target.value.trim()) {
         newTask.name = event.target.value;
         newTask.due_date = formatDateLocal(newTask.due_date);
+        newTask.priority_id = null;
         event.target.value = "";
         await handleAddedTask(newTask);
     }
