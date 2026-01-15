@@ -15,7 +15,6 @@
                     @keydown.enter="addNewTask"
                     spellcheck="false"
                     v-model="taskInput"
-                    :class="inputClass"
                     @scroll="syncScroll"
                     ref="inputRef"
                 />
@@ -47,17 +46,6 @@ const newTask = reactive({
     is_completed: false,
     priority_id: null,
     due_date: null,
-});
-
-const priorityMap = {
-  1: "border-danger text-bg-danger", // high
-  2: "border-warning text-bg-warning", // medium
-  3: "border-primary text-bg-primary", // low
-  null: "border-secondary", // default / none
-};
-
-const inputClass = computed(() => {
-    return priorityMap[newTask.priority_id ?? null];
 });
 
 const inputRef = ref();
@@ -98,7 +86,6 @@ const addNewTask = async (event) => {
         newTask.name = taskInput.value;
         newTask.due_date = formatDateLocal(newTask.due_date);
         taskInput.value = '';
-        newTask.priority_id = null;
         await handleAddedTask(newTask);
     }
 };
