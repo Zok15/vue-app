@@ -31,7 +31,7 @@ const filter = (period) => {
 
 onMounted(() => emit("update", activeFilter.value));
 
-const activeFilterKey = ref("lastweek");
+const activeFilterKey = ref("thisweek");
 
 const activeFilter = computed(
     () =>
