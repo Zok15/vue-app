@@ -57,7 +57,7 @@ const priorityMap = {
 };
 
 const inputClass = computed(() => {
-    return priorityColors[newTask.priority_id ?? null];
+    return priorityMap[newTask.priority_id ?? null];
 });
 
 const inputRef = ref();
