@@ -7,10 +7,10 @@
                         <h1>
                             Summary
                             <small class="text-muted fs-4">{{
-                                selectedFilter
+                                selectedFilter.text
                                 }}</small>
                         </h1>
-                        <SummaryFilter @update="selectedFilter = $event" />
+                        <SummaryFilter @update="setSelectedFilter" />
                     </div>
                     <div v-for="(tasks, description) in summaries" :key="description">
                         <Summaries :tasks="tasks" :description="description" />
@@ -23,7 +23,8 @@
 
 <script setup>
 import { useSummaryStore } from "../stores/summary";
-import { onMounted, ref } from "vue";
+import { onMounted, reactive, watch } from "vue";
+// import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import Summaries from "../components/summaries/Summaries.vue";
 import SummaryFilter from "../components/summaries/filter/SummaryFilter.vue";
@@ -31,9 +32,21 @@ import SummaryFilter from "../components/summaries/filter/SummaryFilter.vue";
 const store = useSummaryStore();
 const { summaries } = storeToRefs(store);
 const { fetchTasksSummary } = store;
-const selectedFilter = ref("");
+const selectedFilter = reactive({
+    period: "",
+    text: "",
+});
+
+const setSelectedFilter = (event) => Object.assign(selectedFilter, event);
 
 onMounted(async () => {
     await fetchTasksSummary();
 });
+
+// const route = useRoute()
+// watch(() => route.query, async (query) => await fetchTasksSummary(query))
+watch(
+    () => selectedFilter.period,
+    async (period) => await fetchTasksSummary({ period }),
+);
 </script>
