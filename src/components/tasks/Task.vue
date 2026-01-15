@@ -1,30 +1,112 @@
 <template>
-    <div class="card mt-2" v-if="tasks.length && show">
-        <ul class="list-group list-group-flush">
-            <Task
-                v-for="task in tasks"
-                :task="task"
-                :key="task.id"
-                @updated="handleUpdatedTask"
-                @completed="handleCompletedTask"
-                @removed="handleRemovedTask"
+    <li class="list-group-item py-3">
+        <div class="d-flex justify-content-start align-items-center">
+            <input
+                class="form-check-input mt-0"
+                type="checkbox"
+                :class="[completedClass, priorityClass]"
+                :checked="task.is_completed"
+                @change="markTaskAsCompleted"
             />
-        </ul>
-    </div>
+            <div
+                class="ms-2 flex-grow-1"
+                :class="completedClass"
+                title="Double click the text to edit or remove"
+                @dblclick="isEdit = true"
+            >
+                <div class="relative" v-if="isEdit">
+                    <input
+                        class="editable-task"
+                        type="text"
+                        v-focus
+                        @keyup.esc="undo"
+                        @keyup.enter="updateTask"
+                        v-model="editingTask"
+                    />
+                </div>
+                <span v-else>{{ task.name }}</span>
+            </div>
+            <!-- <div class="task-date">24 Feb 12:00</div> -->
+        </div>
+        <TaskActions
+            @edit="isEdit = true"
+            v-show="!isEdit"
+            @remove="removeTask"
+        />
+    </li>
 </template>
 
 <script setup>
-import { useTaskStore } from "../../stores/task";
-import Task from "./Task.vue";
+import { computed, ref } from "vue";
+import TaskActions from "./TaskActions.vue";
 
-const store = useTaskStore();
-const { handleUpdatedTask, handleCompletedTask, handleRemovedTask } = store;
-
-defineProps({
-    tasks: Array,
-    show: {
-        type: Boolean,
-        default: true,
-    },
+const props = defineProps({
+    task: Object,
 });
+
+const emit = defineEmits(["updated", "completed", "removed"]);
+
+const isEdit = ref(false);
+const editingTask = ref(props.task.name);
+const completedClass = computed(() =>
+    props.task.is_completed ? "completed" : "",
+);
+
+const vFocus = {
+    mounted: (el) => el.focus(),
+};
+
+const updateTask = (event) => {
+    const updatedTask = { ...props.task, name: event.target.value };
+    isEdit.value = false;
+    emit("updated", updatedTask);
+};
+
+const undo = () => {
+    isEdit.value = false;
+    editingTask.value = props.task.name;
+};
+
+const markTaskAsCompleted = (event) => {
+    const updatedTask = {
+        ...props.task,
+        is_completed: !props.task.is_completed,
+    };
+    emit("completed", updatedTask);
+};
+
+const removeTask = () => {
+    if (confirm("Are you sure?")) {
+        emit("removed", props.task);
+    }
+};
+
+const priorityClass = computed(() =>
+  props.task.priority === null ?
+    "priority-none" :
+    `priority-${props.task.priority.name}`
+);
 </script>
+
+<style scoped>
+.form-check-input:checked {
+    background-color: rgb(108,117,125);
+    border-color: rgb(108,117,125);
+}
+.form-check-input:not(:checked) {
+   outline: 0;
+   border: 0;
+}
+.priority-high:not(:checked) {
+   box-shadow: 0 0 0 0.1rem rgb(220,53,69) !important;
+}
+.priority-medium:not(:checked) {
+   box-shadow: 0 0 0 0.1rem rgb(255,193,7) !important;
+}
+.priority-low:not(:checked) {
+   box-shadow: 0 0 0 0.1rem rgb(13,110,253) !important;
+}
+.priority-none:not(:checked) {
+   box-shadow: 0 0 0 0.1rem rgba(0,0,0,.25) !important;
+}
+</style>
