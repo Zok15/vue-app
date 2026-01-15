@@ -49,6 +49,13 @@ const newTask = reactive({
     due_date: null,
 });
 
+const priorityMap = {
+  1: "border-danger text-bg-danger", // high
+  2: "border-warning text-bg-warning", // medium
+  3: "border-primary text-bg-primary", // low
+  null: "border-secondary", // default / none
+};
+
 const inputClass = computed(() => {
     return priorityColors[newTask.priority_id ?? null];
 });
@@ -91,7 +98,7 @@ const addNewTask = async (event) => {
         newTask.name = taskInput.value;
         newTask.due_date = formatDateLocal(newTask.due_date);
         taskInput.value = '';
-        taskInput.priority_id = null;
+        newTask.priority_id = null;
         await handleAddedTask(newTask);
     }
 };
