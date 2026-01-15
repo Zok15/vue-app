@@ -29,7 +29,6 @@ const newTask = reactive({
 const inputRef = ref()
 
 const setPriority = (id) => {
-    console.log('priority', id);
     newTask.priority_id = id;
     inputRef.value.focus();
 };
